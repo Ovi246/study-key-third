@@ -622,8 +622,8 @@ import Intro from "./assets/toddler_box.png";
                 <div className="sticky top-8">
                   <div className="relative h-[450px] md:h-[600px] lg:h-[700px] w-full">
                     <CustomizableImage
-                      src={Photo2}
-                      alt="Learning journey 1"
+                      src={Photo4}
+                      alt="Learning journey 4"
                       initialX={5}
                       initialY={5}
                       initialRotation={-12}
@@ -633,8 +633,8 @@ import Intro from "./assets/toddler_box.png";
                       zIndex={20}
                     />
                     <CustomizableImage
-                      src={Photo1}
-                      alt="Learning journey 2"
+                      src={Photo5}
+                      alt="Learning journey 5"
                       initialX={35}
                       initialY={15}
                       initialRotation={8}
@@ -644,8 +644,8 @@ import Intro from "./assets/toddler_box.png";
                       zIndex={10}
                     />
                     <CustomizableImage
-                      src={Photo3}
-                      alt="Learning journey 3"
+                      src={Photo6}
+                      alt="Learning journey 6"
                       initialX={15}
                       initialY={40}
                       initialRotation={-5}
@@ -828,7 +828,7 @@ import Intro from "./assets/toddler_box.png";
                 <div className="sticky top-8">
                   <div className="relative h-[450px] md:h-[600px] lg:h-[700px] w-full">
                     <CustomizableImage
-                      src={Photo4}
+                      src={Photo1}
                       alt="Learning journey 1"
                       initialX={5}
                       initialY={5}
@@ -839,7 +839,7 @@ import Intro from "./assets/toddler_box.png";
                       zIndex={20}
                     />
                     <CustomizableImage
-                      src={Photo5}
+                      src={Photo2}
                       alt="Learning journey 2"
                       initialX={35}
                       initialY={15}
@@ -850,7 +850,7 @@ import Intro from "./assets/toddler_box.png";
                       zIndex={10}
                     />
                     <CustomizableImage
-                      src={Photo6}
+                      src={Photo3}
                       alt="Learning journey 3"
                       initialX={15}
                       initialY={40}
