@@ -94,7 +94,7 @@ function Form() {
     async function fetchLocationAndSetLanguage() {
       try {
         const response = await axios.get(
-          "https://study-key-reward.vercel.app/api/location"
+          "https://studykey-third-server.vercel.app/api/location"
         );
         const geo = response.data;
         const language = getLanguageFromCountryCode(geo.country); // Implement this function
@@ -112,7 +112,7 @@ function Form() {
   //     async function fetchReviews() {
   //       try {
   //         const response = await axios.get(
-  //           `https://study-key-reward.vercel.app/product-reviews`,
+  //           `https://studykey-third-server.vercel.app/product-reviews`,
   //           {
   //             params: {
   //               asin: asin,
@@ -379,7 +379,7 @@ function Form() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "https://study-key-reward.vercel.app/validate-order-id",
+        "https://studykey-third-server.vercel.app/validate-order-id",
         {
           orderId: orderId,
         }
@@ -520,7 +520,7 @@ function Form() {
       }
 
       const response = await axios.post(
-        "https://study-key-reward.vercel.app/submit-review",
+        "https://studykey-third-server.vercel.app/submit-review",
         formDataToSubmit,
         {
           headers: {
