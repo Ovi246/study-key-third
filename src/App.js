@@ -93,7 +93,9 @@ function Form() {
   useEffect(() => {
     async function fetchLocationAndSetLanguage() {
       try {
-        const response = await axios.get("http://localhost:5000/api/location");
+        const response = await axios.get(
+          "https://study-key-reward.vercel.app/api/location"
+        );
         const geo = response.data;
         const language = getLanguageFromCountryCode(geo.country); // Implement this function
         setLanguage(language);
@@ -110,7 +112,7 @@ function Form() {
   //     async function fetchReviews() {
   //       try {
   //         const response = await axios.get(
-  //           `http://localhost:5000/product-reviews`,
+  //           `https://study-key-reward.vercel.app/product-reviews`,
   //           {
   //             params: {
   //               asin: asin,
@@ -377,7 +379,7 @@ function Form() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:5000/validate-order-id",
+        "https://study-key-reward.vercel.app/validate-order-id",
         {
           orderId: orderId,
         }
@@ -518,7 +520,7 @@ function Form() {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/submit-review",
+        "https://study-key-reward.vercel.app/submit-review",
         formDataToSubmit,
         {
           headers: {
