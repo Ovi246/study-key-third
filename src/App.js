@@ -85,7 +85,6 @@ import Intro from "./assets/toddler_box.png";
     const [errors, setErrors] = useState({});
     const [reviewType, setReviewType] = useState("amazon");
     const [screenshot, setScreenshot] = useState(null);
-    const [videoFile, setVideoFile] = useState(null);
     const [selectedGift, setSelectedGift] = useState("");
     const giftOptions = [
       { value: "Noun Set", label: "Noun Set" },
@@ -146,8 +145,8 @@ import Intro from "./assets/toddler_box.png";
         newErrors.screenshot = "Please upload your Amazon review screenshot";
       }
 
-      if (reviewType === "video" && !videoFile) {
-        newErrors.video = "Please upload your video testimonial";
+      if (reviewType === "video" && !screenshot) {
+        newErrors.screenshot = "Please upload your video testimonial";
       }
 
       if (!selectedGift) {
@@ -367,8 +366,8 @@ import Intro from "./assets/toddler_box.png";
         if (reviewType === "amazon" && !screenshot) {
           newErrors.screenshot = "Please upload your Amazon review screenshot";
         }
-        if (reviewType === "video" && !videoFile) {
-          newErrors.video = "Please upload your video testimonial";
+        if (reviewType === "video" && !screenshot) {
+          newErrors.screenshot = "Please upload your video testimonial";
         }
       }
 
@@ -556,8 +555,8 @@ import Intro from "./assets/toddler_box.png";
 
         if (reviewType === "amazon" && screenshot) {
           formDataToSubmit.append("screenshot", screenshot);
-        } else if (reviewType === "video" && videoFile) {
-          formDataToSubmit.append("video", videoFile);
+        } else if (reviewType === "video" && screenshot) {
+          formDataToSubmit.append("screenshot", screenshot);
         }
 
         const response = await axios.post(
@@ -1024,7 +1023,11 @@ import Intro from "./assets/toddler_box.png";
 
                       <div className="flex justify-between pt-6">
                         <button
-                          onClick={() => setStep(step - 1)}
+                          onClick={() => {
+                            setReviewType(null);
+                            setScreenshot(null);
+                            setStep(step - 1);
+                          }}
                           className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
                         >
                           Back
@@ -1155,6 +1158,7 @@ import Intro from "./assets/toddler_box.png";
                             }
                             disabled={loading}
                             placeHolder="Select State"
+                            className="w-full p-4 bg-blue-500 text-white placeholder-white/70 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-blue-400"
                           />
                           {errors.state && (
                             <p className="mt-2 text-yellow-400">
@@ -1257,7 +1261,11 @@ import Intro from "./assets/toddler_box.png";
                       <div className="flex justify-between pt-6">
                         <button
                           type="button"
-                          onClick={() => setStep(step - 1)}
+                          onClick={() => {
+                            setReviewType(null);
+                            setScreenshot(null);
+                            setStep(step - 1);
+                          }}
                           className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
                         >
                           Back
