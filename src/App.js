@@ -88,9 +88,12 @@ import Intro from "./assets/toddler_box.png";
     const [videoFile, setVideoFile] = useState(null);
     const [selectedGift, setSelectedGift] = useState("");
     const giftOptions = [
-      { value: "flashcards", label: "Educational Flashcards Set" },
-      { value: "puzzle", label: "Learning Puzzle Pack" },
-      { value: "book", label: "Interactive Story Book" },
+      { value: "Noun Set", label: "Noun Set" },
+      { value: "Sould Delight Set", label: "Sould Delight Set" },
+      {
+        value: "Toddlers Learn & Play Set",
+        label: "Toddlers Learn & Play Set",
+      },
     ];
 
     useEffect(() => {
@@ -168,6 +171,36 @@ import Intro from "./assets/toddler_box.png";
     const changeLanguage = (event) => {
       i18n.changeLanguage(event.target.value);
       setLanguage(event.target.value);
+    };
+
+    const [isModalOpen, setModalOpen] = useState(false);
+
+    const openModal = () => setModalOpen(true);
+    const closeModal = () => setModalOpen(false);
+
+    const Modal = ({ isOpen, onClose, iframeSrc }) => {
+      if (!isOpen) return null;
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50">
+          <div className="bg-white rounded-lg p-4 w-11/12 max-w-2xl relative">
+            <button
+              className="absolute top-2 right-2 text-xl"
+              onClick={onClose}
+            >
+              &times;
+            </button>
+            <iframe
+              src={iframeSrc}
+              title="Boast Form"
+              frameBorder="0"
+              className="w-full h-96"
+              allow="microphone; camera; display-capture; encrypted-media"
+              allowusermedia
+            ></iframe>
+          </div>
+        </div>
+      );
     };
 
     const checkAnswer = () => {
@@ -624,35 +657,35 @@ import Intro from "./assets/toddler_box.png";
                     <CustomizableImage
                       src={Photo4}
                       alt="Learning journey 4"
-                      initialX={5}
-                      initialY={5}
+                      initialX={-10}
+                      initialY={-3}
                       initialRotation={-12}
                       width="55%"
                       minWidth="320px"
                       aspectRatio="4/3"
-                      zIndex={20}
+                      zIndex={10}
                     />
                     <CustomizableImage
                       src={Photo5}
                       alt="Learning journey 5"
                       initialX={35}
-                      initialY={15}
+                      initialY={5}
                       initialRotation={8}
                       width="60%"
                       minWidth="340px"
                       aspectRatio="4/3"
-                      zIndex={10}
+                      zIndex={30}
                     />
                     <CustomizableImage
                       src={Photo6}
                       alt="Learning journey 6"
-                      initialX={15}
+                      initialX={8}
                       initialY={40}
                       initialRotation={-5}
                       width="65%"
                       minWidth="360px"
                       aspectRatio="4/3"
-                      zIndex={30}
+                      zIndex={20}
                     />
                   </div>
                 </div>
@@ -830,19 +863,19 @@ import Intro from "./assets/toddler_box.png";
                     <CustomizableImage
                       src={Photo1}
                       alt="Learning journey 1"
-                      initialX={5}
-                      initialY={5}
+                      initialX={-10}
+                      initialY={15}
                       initialRotation={-12}
-                      width="55%"
+                      width="58%"
                       minWidth="320px"
                       aspectRatio="4/3"
-                      zIndex={20}
+                      zIndex={30}
                     />
                     <CustomizableImage
                       src={Photo2}
                       alt="Learning journey 2"
                       initialX={35}
-                      initialY={15}
+                      initialY={10}
                       initialRotation={8}
                       width="60%"
                       minWidth="340px"
@@ -853,12 +886,12 @@ import Intro from "./assets/toddler_box.png";
                       src={Photo3}
                       alt="Learning journey 3"
                       initialX={15}
-                      initialY={40}
+                      initialY={55}
                       initialRotation={-5}
                       width="65%"
                       minWidth="360px"
                       aspectRatio="4/3"
-                      zIndex={30}
+                      zIndex={20}
                     />
                   </div>
                 </div>
@@ -909,7 +942,13 @@ import Intro from "./assets/toddler_box.png";
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <button
-                            onClick={() => setReviewType("amazon")}
+                            onClick={() => {
+                              setReviewType("amazon");
+                              window.open(
+                                `https://www.amazon.com/review/create-review/?ie=UTF8&channel=glance-detail&asin=${asin}`,
+                                "_blank"
+                              );
+                            }}
                             className={`p-6 rounded-lg border-2 transition-all ${
                               reviewType === "amazon"
                                 ? "border-blue-500 bg-blue-500 text-white"
@@ -931,7 +970,10 @@ import Intro from "./assets/toddler_box.png";
                           </button>
 
                           <button
-                            onClick={() => setReviewType("video")}
+                            onClick={() => {
+                              setReviewType("video");
+                              openModal();
+                            }}
                             className={`p-6 rounded-lg border-2 transition-all ${
                               reviewType === "video"
                                 ? "border-blue-500 bg-blue-500 text-white"
@@ -951,50 +993,33 @@ import Intro from "./assets/toddler_box.png";
                               Share a video testimonial
                             </p>
                           </button>
+                          {reviewType === "video" && (
+                            <Modal
+                              isOpen={isModalOpen}
+                              onClose={closeModal}
+                              iframeSrc="https://widgets.boast.io/current/iframe-embed.html?boast-component=boast-form&form-id=c55aa091-c666-4b22-a254-39dd27910429"
+                            />
+                          )}
                         </div>
 
-                        {reviewType === "amazon" && (
-                          <div className="mt-6 space-y-4">
-                            <button
-                              onClick={() =>
-                                window.open(
-                                  `https://www.amazon.com/review/create-review/?ie=UTF8&channel=glance-detail&asin=${asin}`,
-                                  "_blank"
-                                )
-                              }
-                              className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition"
-                            >
-                              Write Amazon Review
-                            </button>
-                            <div>
-                              <label className="block text-lg mb-2">
-                                Upload Screenshot
-                              </label>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) =>
-                                  setScreenshot(e.target.files[0])
-                                }
-                                className="w-full p-3 bg-blue-500 text-white rounded-lg"
-                              />
-                            </div>
-                          </div>
-                        )}
-
-                        {reviewType === "video" && (
-                          <div className="mt-6">
+                        <div className="mt-6 space-y-4">
+                          <div>
                             <label className="block text-lg mb-2">
-                              Upload Video
+                              Upload Screenshot{" "}
+                              <span className="text-sm text-blue-500">
+                                {reviewType === "amazon"
+                                  ? "(Please upload a screenshot of your Amazon Review)"
+                                  : "(Please upload a screenshot of your Video Review)"}
+                              </span>
                             </label>
                             <input
                               type="file"
-                              accept="video/*"
-                              onChange={(e) => setVideoFile(e.target.files[0])}
+                              accept="image/*"
+                              onChange={(e) => setScreenshot(e.target.files[0])}
                               className="w-full p-3 bg-blue-500 text-white rounded-lg"
                             />
                           </div>
-                        )}
+                        </div>
                       </div>
 
                       <div className="flex justify-between pt-6">
@@ -1022,24 +1047,24 @@ import Intro from "./assets/toddler_box.png";
                     <CustomizableImage
                       src={Photo2}
                       alt="Learning journey 1"
-                      initialX={5}
-                      initialY={5}
+                      initialX={-10}
+                      initialY={-3}
                       initialRotation={-12}
-                      width="55%"
+                      width="60%"
                       minWidth="320px"
                       aspectRatio="4/3"
-                      zIndex={20}
+                      zIndex={10}
                     />
                     <CustomizableImage
                       src={Photo1}
                       alt="Learning journey 2"
                       initialX={35}
-                      initialY={15}
+                      initialY={1}
                       initialRotation={8}
                       width="60%"
                       minWidth="340px"
                       aspectRatio="4/3"
-                      zIndex={10}
+                      zIndex={30}
                     />
                     <CustomizableImage
                       src={Photo3}
@@ -1050,7 +1075,7 @@ import Intro from "./assets/toddler_box.png";
                       width="65%"
                       minWidth="360px"
                       aspectRatio="4/3"
-                      zIndex={30}
+                      zIndex={20}
                     />
                   </div>
                 </div>
@@ -1253,18 +1278,18 @@ import Intro from "./assets/toddler_box.png";
                 <div className="sticky top-8">
                   <div className="relative h-[450px] md:h-[600px] lg:h-[700px] w-full">
                     <CustomizableImage
-                      src={Photo2}
+                      src={Photo4}
                       alt="Learning journey 1"
-                      initialX={5}
-                      initialY={5}
+                      initialX={-5}
+                      initialY={0}
                       initialRotation={-12}
                       width="55%"
                       minWidth="320px"
                       aspectRatio="4/3"
-                      zIndex={20}
+                      zIndex={10}
                     />
                     <CustomizableImage
-                      src={Photo1}
+                      src={Photo5}
                       alt="Learning journey 2"
                       initialX={35}
                       initialY={15}
@@ -1272,18 +1297,18 @@ import Intro from "./assets/toddler_box.png";
                       width="60%"
                       minWidth="340px"
                       aspectRatio="4/3"
-                      zIndex={10}
+                      zIndex={30}
                     />
                     <CustomizableImage
-                      src={Photo3}
+                      src={Photo6}
                       alt="Learning journey 3"
-                      initialX={15}
+                      initialX={-13}
                       initialY={40}
                       initialRotation={-5}
                       width="65%"
                       minWidth="360px"
                       aspectRatio="4/3"
-                      zIndex={30}
+                      zIndex={20}
                     />
                   </div>
                 </div>
@@ -1375,35 +1400,35 @@ import Intro from "./assets/toddler_box.png";
                     <CustomizableImage
                       src={Photo2}
                       alt="Learning journey 1"
-                      initialX={5}
-                      initialY={5}
+                      initialX={3}
+                      initialY={-2}
                       initialRotation={-12}
-                      width="55%"
+                      width="58%"
                       minWidth="320px"
                       aspectRatio="4/3"
-                      zIndex={20}
+                      zIndex={10}
                     />
                     <CustomizableImage
                       src={Photo1}
                       alt="Learning journey 2"
                       initialX={35}
-                      initialY={15}
+                      initialY={10}
                       initialRotation={8}
                       width="60%"
                       minWidth="340px"
                       aspectRatio="4/3"
-                      zIndex={10}
+                      zIndex={30}
                     />
                     <CustomizableImage
                       src={Photo3}
                       alt="Learning journey 3"
-                      initialX={15}
+                      initialX={0}
                       initialY={40}
                       initialRotation={-5}
                       width="65%"
                       minWidth="360px"
                       aspectRatio="4/3"
-                      zIndex={30}
+                      zIndex={20}
                     />
                   </div>
                 </div>
