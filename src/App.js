@@ -24,7 +24,7 @@ import Photo4 from "./assets/Photo4.jpeg";
 import Photo5 from "./assets/Photo5.jpg";
 import Photo6 from "./assets/Photo6.png";
 import CustomizableImage from "./CustomizableImg";
-import { FiUpload, FiVideo, FiCamera, FiStar } from 'react-icons/fi';
+import { FiUpload, FiVideo, FiCamera, FiStar, FiPlay, FiPause, FiSquare, FiRotateCcw } from 'react-icons/fi';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -92,6 +92,8 @@ function Form() {
   const [rating, setRating] = useState(0);
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [amazonScreenshot, setAmazonScreenshot] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
 
   const giftOptions = [
     { value: "Noun Set", label: "Noun Set" },
@@ -710,13 +712,21 @@ const UploadProgress = ({ progress }) => {
     setRecordingStatus("inactive");
     mediaRecorder.current.stop();
   
+    // Stop all tracks in the stream and clear the live video feed
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      if (liveVideoFeed.current) {
+        liveVideoFeed.current.srcObject = null;
+      }
+    }
+  
     mediaRecorder.current.onstop = () => {
       const videoBlob = new Blob(videoChunks, { type: mimeType });
       const videoUrl = URL.createObjectURL(videoBlob);
       setRecordedVideo(videoUrl);
       setVideoChunks([]);
-      setScreenshot(null); // Clear any existing screenshot
-      setAmazonScreenshot(null); // Clear any Amazon screenshot
+      setIsPlaying(false);
+      setStream(null); // Clear the stream state
     };
   };
   
@@ -729,6 +739,8 @@ const UploadProgress = ({ progress }) => {
 
   const getCameraPermission = async () => {
     setRecordedVideo(null);
+    setIsPlaying(false);
+    
     if ("MediaRecorder" in window) {
       try {
         const videoConstraints = {
@@ -747,8 +759,10 @@ const UploadProgress = ({ progress }) => {
           ...audioStream.getAudioTracks(),
         ]);
   
-        setStream(videoStream);
-        liveVideoFeed.current.srcObject = videoStream;
+        setStream(combinedStream);
+        if (liveVideoFeed.current) {
+          liveVideoFeed.current.srcObject = combinedStream;
+        }
       } catch (err) {
         toast.error(err.message);
       }
@@ -1175,100 +1189,143 @@ const UploadProgress = ({ progress }) => {
 
                     {reviewType === "video" && (
       <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <h4 className="text-xl font-semibold text-gray-800">Record Video</h4>
-            <div className="video-controls flex flex-wrap gap-3">
-              {!permission ? (
-                <button
-                  onClick={getCameraPermission}
-                  type="button"
-                  className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-                >
-                  <FiVideo className="mr-2" />
-                  Allow Camera
-                </button>
-              ) : null}
-              {permission && recordingStatus === "inactive" ? (
-                <button
-                  onClick={startRecording}
-                  type="button"
-                  className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all"
-                >
-                  <FiCamera className="mr-2" />
-                  Start Recording
-                </button>
-              ) : null}
-              {recordingStatus === "recording" ? (
-                <button
-                  onClick={stopRecording}
-                  type="button"
-                  className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
-                >
-                  <FiVideo className="mr-2" />
-                  Stop Recording
-                </button>
-              ) : null}
-            </div>
-            
-            <div className="video-preview mt-4">
-              {!recordedVideo ? (
-                <video
-                  ref={liveVideoFeed}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full aspect-video bg-black rounded-lg"
-                ></video>
-              ) : (
-                <video
-                  src={recordedVideo}
-                  controls
-                  className="w-full aspect-video bg-black rounded-lg"
-                ></video>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-xl font-semibold text-gray-800">Upload Video</h4>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoUpload}
-                className="hidden"
-                id="video-upload"
-              />
-              <label
-                htmlFor="video-upload"
-                className="cursor-pointer flex flex-col items-center space-y-2"
+        <div className="space-y-4">
+          <h4 className="text-xl font-semibold text-gray-800">Record Video Review</h4>
+          
+          <div className="video-controls flex flex-wrap gap-3">
+            {!permission ? (
+              <button
+                onClick={getCameraPermission}
+                type="button"
+                className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
               >
-                <FiUpload className="w-8 h-8 text-gray-400" />
-                <span className="text-gray-600">Click to upload video</span>
-              </label>
-              {uploadedVideo && (
-                <p className="mt-2 text-sm text-gray-600">
-                  Selected: {uploadedVideo.name}
-                </p>
-              )}
-            </div>
+                <FiVideo className="mr-2" />
+                Allow Camera
+              </button>
+            ) : recordingStatus === "inactive" && !recordedVideo ? (
+              <button
+                onClick={startRecording}
+                type="button"
+                className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all"
+              >
+                <FiCamera className="mr-2" />
+                Start Recording
+              </button>
+            ) : recordingStatus === "recording" ? (
+              <button
+                onClick={stopRecording}
+                type="button"
+                className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+              >
+                <FiVideo className="mr-2" />
+                Stop Recording
+              </button>
+            ) : null}
+
+            {recordedVideo && (
+              <div className="space-y-4 w-full">
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => {
+                      if (videoRef.current) {
+                        if (isPlaying) {
+                          videoRef.current.pause();
+                        } else {
+                          videoRef.current.play();
+                        }
+                        setIsPlaying(!isPlaying);
+                      }
+                    }}
+                    type="button"
+                    className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
+                  >
+                    {isPlaying ? (
+                      <>
+                        <FiPause className="mr-2" />
+                        Pause
+                      </>
+                    ) : (
+                      <>
+                        <FiPlay className="mr-2" />
+                        Play
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (videoRef.current) {
+                        videoRef.current.pause();
+                        videoRef.current.currentTime = 0;
+                        setIsPlaying(false);
+                      }
+                    }}
+                    type="button"
+                    className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
+                  >
+                    <FiSquare className="mr-2" />
+                    Stop
+                  </button>
+                  <button
+                    onClick={() => {
+                      setRecordedVideo(null);
+                      setPermission(false);
+                      setRecordingStatus("inactive");
+                      if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                        if (liveVideoFeed.current) {
+                          liveVideoFeed.current.srcObject = null;
+                        }
+                      }
+                      setStream(null);
+                      getCameraPermission(); // Automatically restart camera for new recording
+                    }}
+                    type="button"
+                    className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all"
+                  >
+                    <FiRotateCcw className="mr-2" />
+                    Re-record
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="video-preview mt-4">
+            {!recordedVideo ? (
+              <video
+                ref={liveVideoFeed}
+                autoPlay
+                playsInline
+                muted
+                className="w-full aspect-video bg-black rounded-lg"
+              ></video>
+            ) : (
+              <video
+                ref={videoRef}
+                src={recordedVideo}
+                className="w-full aspect-video bg-black rounded-lg"
+                onEnded={() => setIsPlaying(false)}
+                playsInline // Add this to ensure proper playback on mobile
+              ></video>
+            )}
           </div>
         </div>
 
-        <div className="space-y-4 pt-6">
-          <h4 className="text-xl font-semibold text-gray-800">Your Feedback</h4>
-          <div className="space-y-4">
-            <StarRating rating={rating} onRatingChange={setRating} />
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Share your experience with our product..."
-              className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              rows="4"
-            ></textarea>
+        {recordedVideo && (
+          <div className="space-y-4 pt-6">
+            <h4 className="text-xl font-semibold text-gray-800">Your Feedback</h4>
+            <div className="space-y-4">
+              <StarRating rating={rating} onRatingChange={setRating} />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Share your experience with our product..."
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                rows="4"
+              ></textarea>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     )}
                   </div>
