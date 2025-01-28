@@ -113,6 +113,24 @@ function Form() {
   const [recordedVideo, setRecordedVideo] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Add new state for feedback
+  const [feedback, setFeedback] = useState({
+    productPurchased: '',
+    productSatisfaction: '',
+    wouldRecommend: ''
+  });
+
+  // Add new state for recording timer and guide
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [currentGuide, setCurrentGuide] = useState(0);
+
+  // Add recording guide questions
+  const recordingGuides = [
+    "What product did you purchase?",
+    "How do you like your set?",
+    "Would you recommend this product to others?",
+  ];
+
   useEffect(() => {
     async function fetchLocationAndSetLanguage() {
       try {
@@ -359,7 +377,7 @@ function Form() {
     const newErrors = {};
 
     // Step 1 validations
-    if (step === 0) {
+    if (step === 1) {
       if (!formData.fullName.trim()) {
         newErrors.fullName = "Full name is required";
       }
@@ -462,7 +480,7 @@ function Form() {
     e.preventDefault();
 
     // Special handling for step 0
-    if (step === 0) {
+    if (step === 1) {
       const newErrors = {};
 
       // Basic field validation
@@ -567,12 +585,20 @@ function Form() {
           formDataToSubmit.append(key, formData[key]);
         }
       });
-
       // Add review type and metadata
       formDataToSubmit.append("reviewType", reviewType);
       formDataToSubmit.append("selectedGift", selectedGift);
       formDataToSubmit.append("rating", rating);
       formDataToSubmit.append("review", description);
+
+      // Add feedback data
+      formDataToSubmit.append("feedback", JSON.stringify({
+        productPurchased: feedback.productPurchased,
+        productSatisfaction: feedback.productSatisfaction,
+        wouldRecommend: feedback.wouldRecommend,
+        rating,
+        additionalComments: description
+      }));
 
       // Handle video upload - convert Blob URL to File object if it's a recorded video
       if (recordedVideo) {
@@ -667,7 +693,6 @@ const UploadProgress = ({ progress }) => {
     </div>
   );
 
-
   const handleVideoUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith('video/')) {
@@ -693,6 +718,9 @@ const UploadProgress = ({ progress }) => {
 
   const startRecording = async () => {
     setRecordingStatus("recording");
+    setRecordingTime(0);
+    setCurrentGuide(0);
+    
     const media = new MediaRecorder(stream, { mimeType });
     mediaRecorder.current = media;
     mediaRecorder.current.start();
@@ -705,6 +733,23 @@ const UploadProgress = ({ progress }) => {
     };
   
     setVideoChunks(localVideoChunks);
+  
+    // Start timer and guide rotation
+    const timer = setInterval(() => {
+      setRecordingTime(prev => {
+        const newTime = prev + 1;
+        // Change guide question every 20 seconds
+        if (newTime % 20 === 0) {
+          setCurrentGuide(prev => (prev + 1) % recordingGuides.length);
+        }
+        // Stop recording after 60 seconds
+        if (newTime >= 60) {
+          clearInterval(timer);
+          stopRecording();
+        }
+        return newTime;
+      });
+    }, 1000);
   };
   
   const stopRecording = () => {
@@ -826,12 +871,6 @@ const UploadProgress = ({ progress }) => {
                     className="flex-1 px-8 py-4 bg-blue-500 text-white text-lg font-semibold rounded-lg shadow-lg hover:bg-blue-600 transform transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
                   >
                     Start Now
-                  </button>
-                  <button
-                    onClick={() => (window.location.href = "/faq")} // Add your FAQ route
-                    className="flex-1 px-8 py-4 border-2 border-blue-500 text-blue-500 text-lg font-semibold rounded-lg hover:bg-blue-50 transform transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
-                  >
-                    Learn More
                   </button>
                 </div>
               </div>
@@ -1125,10 +1164,10 @@ const UploadProgress = ({ progress }) => {
                   <div className="space-y-4">
                     <h3 className="text-2xl font-semibold text-gray-800 mb-4">
                       How Would You Like to Share?
-                      <span className="text-sm text-gray-500">
-                        Make sure to take a screenshot of your review
-                      </span>
                     </h3>
+                      <span className="text-xl text-red-500">
+                        {reviewType === "amazon" ? "(Make sure to take a screenshot of your review)" : "(Make sure to record a video review in 1 minute)"}
+                      </span>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <button
                         onClick={() => {
@@ -1290,39 +1329,139 @@ const UploadProgress = ({ progress }) => {
             )}
           </div>
           
-          <div className="video-preview mt-4">
-            {!recordedVideo ? (
-              <video
-                ref={liveVideoFeed}
-                autoPlay
-                playsInline
-                muted
-                className="w-full aspect-video bg-black rounded-lg"
-              ></video>
-            ) : (
-              <video
-                ref={videoRef}
-                src={recordedVideo}
-                className="w-full aspect-video bg-black rounded-lg"
-                onEnded={() => setIsPlaying(false)}
-                playsInline // Add this to ensure proper playback on mobile
-              ></video>
-            )}
+          <div className="video-preview mt-4 relative">
+  {!recordedVideo ? (
+    <>
+      <video
+        ref={liveVideoFeed}
+        autoPlay
+        playsInline
+        muted
+        className="w-full aspect-video bg-black rounded-lg"
+      ></video>
+      {recordingStatus === "recording" && (
+        <>
+          {/* Recording timer */}
+          <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full flex items-center">
+            <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
+            {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, '0')}
           </div>
+          
+          {/* Guide question */}
+          <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded-lg backdrop-blur-sm">
+            <p className="text-lg font-medium">{recordingGuides[currentGuide]}</p>
+            <p className="text-sm opacity-75 mt-1">
+              {`Question ${currentGuide + 1} of ${recordingGuides.length} • ${20 - (recordingTime % 20)} seconds remaining`}
+            </p>
+          </div>
+        </>
+      )}
+      {recordingStatus === "inactive" && !recordedVideo && permission && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+          <div className="text-center text-white p-6">
+            <h3 className="text-xl font-semibold mb-4">Recording Guidelines</h3>
+            <ul className="space-y-2 text-left">
+              {recordingGuides.map((guide, index) => (
+                <li key={index} className="flex items-start">
+                  <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
+                    {index + 1}
+                  </span>
+                  {guide}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-sm opacity-75">You'll have 20 seconds per question • 1 minute total</p>
+          </div>
+        </div>
+      )}
+    </>
+  ) : (
+    <video
+      ref={videoRef}
+      src={recordedVideo}
+      className="w-full aspect-video bg-black rounded-lg"
+      onEnded={() => setIsPlaying(false)}
+      playsInline
+    ></video>
+  )}
+</div>
         </div>
 
         {recordedVideo && (
-          <div className="space-y-4 pt-6">
-            <h4 className="text-xl font-semibold text-gray-800">Your Feedback</h4>
-            <div className="space-y-4">
-              <StarRating rating={rating} onRatingChange={setRating} />
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Share your experience with our product..."
-                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                rows="4"
-              ></textarea>
+          <div className="space-y-6 pt-6">
+            <h4 className="text-xl font-semibold text-gray-800">Share Your Experience</h4>
+            
+            <div className="space-y-6">
+              {/* Star Rating */}
+              <div className="space-y-2">
+                <label className="block text-gray-700">Overall Rating</label>
+                <StarRating rating={rating} onRatingChange={setRating} />
+              </div>
+
+              {/* Feedback Questions */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">What product did you purchase?</label>
+                  <input
+                    type="text"
+                    value={feedback.productPurchased}
+                    onChange={(e) => setFeedback(prev => ({
+                      ...prev,
+                      productPurchased: e.target.value
+                    }))}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    placeholder="e.g., Flashcard Set, Learning Kit..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">How do you like your set?</label>
+                  <textarea
+                    value={feedback.productSatisfaction}
+                    onChange={(e) => setFeedback(prev => ({
+                      ...prev,
+                      productSatisfaction: e.target.value
+                    }))}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    rows="2"
+                    placeholder="Share your experience with the product..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">Would you recommend this product?</label>
+                  <div className="flex gap-4">
+                    {['Yes', 'No', 'Maybe'].map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setFeedback(prev => ({
+                          ...prev,
+                          wouldRecommend: option
+                        }))}
+                        className={`px-4 py-2 rounded-lg transition-all ${
+                          feedback.wouldRecommend === option
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">Additional Comments (Optional)</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                    rows="3"
+                    placeholder="Any additional thoughts you'd like to share..."
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
