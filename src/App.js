@@ -177,13 +177,15 @@ function Form() {
       newErrors.reviewType = "Please select a review type";
     }
 
-    if (reviewType === "amazon" && !screenshot) {
-      newErrors.screenshot = "Please upload your Amazon review screenshot";
-    }
+    // Commented out Amazon screenshot validation
+    // if (reviewType === "amazon" && !screenshot) {
+    //   newErrors.screenshot = "Please upload your Amazon review screenshot";
+    // }
 
-    if (reviewType === "video" && !screenshot) {
-      newErrors.screenshot = "Please upload your video testimonial";
-    }
+    // Commented out video validation
+    // if (reviewType === "video" && !screenshot) {
+    //   newErrors.screenshot = "Please upload your video testimonial";
+    // }
 
     if (!selectedGift) {
       newErrors.gift = "Please select your gift";
@@ -399,13 +401,14 @@ function Form() {
       if (!selectedGift) {
         newErrors.gift = "Please select your gift";
       }
-      if (reviewType === "amazon" && !screenshot) {
-        newErrors.screenshot = "Please upload your Amazon review screenshot";
-      }
-      if (reviewType === "video" && (!recordedVideo)) {
-        newErrors.screenshot = "Please upload your video testimonial";
-      }
-     
+      // Commented out Amazon screenshot validation
+      // if (reviewType === "amazon" && !screenshot) {
+      //   newErrors.screenshot = "Please upload your Amazon review screenshot";
+      // }
+      // Commented out video validation
+      // if (reviewType === "video" && (!recordedVideo)) {
+      //   newErrors.screenshot = "Please upload your video testimonial";
+      // }
     }
 
     // Step 3 validations
@@ -1128,447 +1131,138 @@ const UploadProgress = ({ progress }) => {
   } else if (step === 2) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4 md:p-8 flex items-center justify-center">
-      <div className="max-w-[1400px] w-full mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-4 items-center">
-          <div className="order-2 lg:order-1 flex flex-col justify-center max-w-2xl mx-auto w-full">
-            <div className="space-y-8 w-full">
-              <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-6">
-                  CHOOSE YOUR <span className="text-blue-500">REWARD</span>
-                </h1>
+        <div className="max-w-[1400px] w-full mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-4 items-center">
+            <div className="order-2 lg:order-1 flex flex-col justify-center max-w-2xl mx-auto w-full">
+              <div className="space-y-8 w-full">
+                <div>
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 mb-6">
+                    CHOOSE YOUR <span className="text-blue-500">REWARD</span>
+                  </h1>
 
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-                      Select Your Gift
-                    </h3>
-                    <select
-                      value={selectedGift}
-                      onChange={(e) => setSelectedGift(e.target.value)}
-                      className={`w-full p-4 bg-blue-500 text-white rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-blue-400 ${
-                        errors.gift ? "border-2 border-yellow-400" : ""
-                      }`}
-                    >
-                      <option value="">Choose your reward</option>
-                      {giftOptions.map((gift) => (
-                        <option key={gift.value} value={gift.value}>
-                          {gift.label}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.gift && (
-                      <p className="mt-2 text-yellow-400">{errors.gift}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-4">
-                      How Would You Like to Share?
-                    </h3>
-                      <span className="text-xl text-red-500">
-                        {reviewType === "amazon" ? "(Make sure to take a screenshot of your review)" : "(Make sure to record a video review in 1 minute)"}
-                      </span>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <button
-                        onClick={() => {
-                          setReviewType("amazon");
-                          window.open(
-                            `https://www.amazon.com/review/create-review/?ie=UTF8&channel=glance-detail&asin=${asin}`,
-                            "_blank"
-                          );
-                          setRecordedVideo(null);
-                          setUploadedVideo(null);
-                        }}
-                        className={`p-6 rounded-lg border-2 transition-all ${
-                          reviewType === "amazon"
-                            ? "border-blue-500 bg-blue-500 text-white"
-                            : "border-blue-500 text-blue-500 hover:bg-blue-50"
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+                        Select Your Gift
+                      </h3>
+                      <select
+                        value={selectedGift}
+                        onChange={(e) => setSelectedGift(e.target.value)}
+                        className={`w-full p-4 bg-blue-500 text-white rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-blue-400 ${
+                          errors.gift ? "border-2 border-yellow-400" : ""
                         }`}
                       >
-                        <h4 className="text-xl font-semibold mb-2">
-                          Amazon Review
-                        </h4>
-                        <p
-                          className={
-                            reviewType === "amazon"
-                              ? "text-white"
-                              : "text-gray-600"
-                          }
-                        >
-                          Write a review on Amazon
-                        </p>
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          setReviewType("video");
-                          setScreenshot(null);
-                          setAmazonScreenshot(null);
-                        }}
-                        className={`p-6 rounded-lg border-2 transition-all ${
-                          reviewType === "video"
-                            ? "border-blue-500 bg-blue-500 text-white"
-                            : "border-blue-500 text-blue-500 hover:bg-blue-50"
-                        }`}
-                      >
-                        <h4 className="text-xl font-semibold mb-2">
-                          Video Review
-                        </h4>
-                        <p
-                          className={
-                            reviewType === "video"
-                              ? "text-white"
-                              : "text-gray-600"
-                          }
-                        >
-                          Share a video testimonial
-                        </p>
-                      </button>
+                        <option value="">Choose your reward</option>
+                        {giftOptions.map((gift) => (
+                          <option key={gift.value} value={gift.value}>
+                            {gift.label}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.gift && (
+                        <p className="mt-2 text-yellow-400">{errors.gift}</p>
+                      )}
                     </div>
 
-                    {reviewType === "video" && (
-      <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-        <div className="space-y-4">
-          <h4 className="text-xl font-semibold text-gray-800">Record Video Review</h4>
-          
-          <div className="video-controls flex flex-wrap gap-3">
-            {!permission ? (
-              <button
-                onClick={getCameraPermission}
-                type="button"
-                className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-              >
-                <FiVideo className="mr-2" />
-                Allow Camera
-              </button>
-            ) : recordingStatus === "inactive" && !recordedVideo ? (
-              <button
-                onClick={startRecording}
-                type="button"
-                className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all"
-              >
-                <FiCamera className="mr-2" />
-                Start Recording
-              </button>
-            ) : recordingStatus === "recording" ? (
-              <button
-                onClick={stopRecording}
-                type="button"
-                className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
-              >
-                <FiVideo className="mr-2" />
-                Stop Recording
-              </button>
-            ) : null}
+             
 
-            {recordedVideo && (
-              <div className="space-y-4 w-full">
-                <div className="flex flex-wrap gap-3">
+                    {reviewType === "amazon" && (
+          <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
+            <div className="space-y-4">
+              <h4 className="text-xl font-semibold text-gray-800">
+                Share Your Amazon Review
+              </h4>
+              
+              <div className="text-center space-y-4">
+                <p className="text-lg text-gray-700 leading-relaxed">
+                  We would love to get your honest feedback, you will be helping us improve our product for toddlers like yours!
+                </p>
+                
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <p className="text-sm text-gray-600 mb-3">Click the button below to leave your review on Amazon:</p>
                   <button
-                    onClick={() => {
-                      if (videoRef.current) {
-                        if (isPlaying) {
-                          videoRef.current.pause();
-                        } else {
-                          videoRef.current.play();
-                        }
-                        setIsPlaying(!isPlaying);
-                      }
-                    }}
                     type="button"
-                    className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-                  >
-                    {isPlaying ? (
-                      <>
-                        <FiPause className="mr-2" />
-                        Pause
-                      </>
-                    ) : (
-                      <>
-                        <FiPlay className="mr-2" />
-                        Play
-                      </>
-                    )}
-                  </button>
-                  <button
                     onClick={() => {
-                      if (videoRef.current) {
-                        videoRef.current.pause();
-                        videoRef.current.currentTime = 0;
-                        setIsPlaying(false);
-                      }
+                      window.open(
+                        `https://www.amazon.com/review/create-review/?ie=UTF8&channel=glance-detail&asin=${asin}`,
+                        "_blank"
+                      );
                     }}
-                    type="button"
-                    className="flex items-center px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
+                    className="px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all font-medium"
                   >
-                    <FiSquare className="mr-2" />
-                    Stop
+                    Leave Amazon Review
                   </button>
-                  <button
-                    onClick={() => {
-                      setRecordedVideo(null);
-                      setPermission(false);
-                      setRecordingStatus("inactive");
-                      if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                        if (liveVideoFeed.current) {
-                          liveVideoFeed.current.srcObject = null;
-                        }
-                      }
-                      setStream(null);
-                      getCameraPermission(); // Automatically restart camera for new recording
-                    }}
-                    type="button"
-                    className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all"
-                  >
-                    <FiRotateCcw className="mr-2" />
-                    Re-record
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="video-preview mt-4 relative">
-  {!recordedVideo ? (
-    <>
-      <video
-        ref={liveVideoFeed}
-        autoPlay
-        playsInline
-        muted
-        className="w-full aspect-video bg-black rounded-lg"
-      ></video>
-      {recordingStatus === "recording" && (
-        <>
-          {/* Recording timer */}
-          <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full flex items-center">
-            <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-            {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, '0')}
-          </div>
-          
-          {/* Guide question */}
-          <div className="absolute bottom-4 left-4 right-4 bg-black/70 text-white p-4 rounded-lg backdrop-blur-sm">
-            <p className="text-lg font-medium">{recordingGuides[currentGuide]}</p>
-            <p className="text-sm opacity-75 mt-1">
-              {`Question ${currentGuide + 1} of ${recordingGuides.length} • ${20 - (recordingTime % 20)} seconds remaining`}
-            </p>
-          </div>
-        </>
-      )}
-      {recordingStatus === "inactive" && !recordedVideo && permission && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
-          <div className="text-center text-white p-6">
-            <h3 className="text-xl font-semibold mb-4">Recording Guidelines</h3>
-            <ul className="space-y-2 text-left">
-              {recordingGuides.map((guide, index) => (
-                <li key={index} className="flex items-start">
-                  <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                    {index + 1}
-                  </span>
-                  {guide}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 text-sm opacity-75">You'll have 20 seconds per question • 1 minute total</p>
-          </div>
-        </div>
-      )}
-    </>
-  ) : (
-    <video
-      ref={videoRef}
-      src={recordedVideo}
-      className="w-full aspect-video bg-black rounded-lg"
-      onEnded={() => setIsPlaying(false)}
-      playsInline
-    ></video>
-  )}
-</div>
-        </div>
-
-        {recordedVideo && (
-          <div className="space-y-6 pt-6">
-            <h4 className="text-xl font-semibold text-gray-800">Share Your Experience</h4>
-            
-            <div className="space-y-6">
-              {/* Star Rating */}
-              <div className="space-y-2">
-                <label className="block text-gray-700">Overall Rating</label>
-                <StarRating rating={rating} onRatingChange={setRating} />
-              </div>
-
-              {/* Feedback Questions */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-700 mb-2">What product did you purchase?</label>
-                  <input
-                    type="text"
-                    value={feedback.productPurchased}
-                    onChange={(e) => setFeedback(prev => ({
-                      ...prev,
-                      productPurchased: e.target.value
-                    }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                    placeholder="e.g., Flashcard Set, Learning Kit..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 mb-2">How do you like your set?</label>
-                  <textarea
-                    value={feedback.productSatisfaction}
-                    onChange={(e) => setFeedback(prev => ({
-                      ...prev,
-                      productSatisfaction: e.target.value
-                    }))}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                    rows="2"
-                    placeholder="Share your experience with the product..."
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 mb-2">Would you recommend this product?</label>
-                  <div className="flex gap-4">
-                    {['Yes', 'No', 'Maybe'].map((option) => (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setFeedback(prev => ({
-                          ...prev,
-                          wouldRecommend: option
-                        }))}
-                        className={`px-4 py-2 rounded-lg transition-all ${
-                          feedback.wouldRecommend === option
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-gray-700 mb-2">Additional Comments (Optional)</label>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                    rows="3"
-                    placeholder="Any additional thoughts you'd like to share..."
-                  />
                 </div>
               </div>
             </div>
           </div>
         )}
-      </div>
-    )}
-                  </div>
 
-                  {reviewType === "amazon" && (
-      <div className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-        <div className="space-y-4">
-          <h4 className="text-xl font-semibold text-gray-800">
-            Upload Amazon Review Screenshot
-          </h4>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleScreenshotUpload}
-              className="hidden"
-              id="screenshot-upload"
-            />
-            <label
-              htmlFor="screenshot-upload"
-              className="cursor-pointer flex flex-col items-center space-y-2"
-            >
-              <FiUpload className="w-8 h-8 text-gray-400" />
-              <span className="text-gray-600">Click to upload screenshot</span>
-            </label>
-            {amazonScreenshot && (
-              <div className="mt-4">
-                <img
-                  src={URL.createObjectURL(amazonScreenshot)}
-                  alt="Review screenshot"
-                  className="max-h-48 mx-auto rounded-lg"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    )}
-
-                  <div className="flex justify-between pt-6">
-                    <button
-                      onClick={() => {
-                        setReviewType(null);
-                        setScreenshot(null);
-                        setStep(step - 1);
-                      }}
-                      className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
-                    >
-                      Back
-                    </button>
-                    <button
-                      onClick={handleNextStep}
-                      className="px-8 py-3 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition-all hover:scale-105"
-                    >
-                      {loading ? "Processing..." : "Continue"}
-                    </button>
+                    <div className="flex justify-between pt-6">
+                      <button
+                        onClick={() => {
+                          setReviewType(null);
+                          setScreenshot(null);
+                          setStep(step - 1);
+                        }}
+                        className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleNextStep}
+                        className="px-8 py-3 bg-blue-500 text-white rounded-lg shadow-lg hover:bg-blue-600 transform transition-all hover:scale-105"
+                      >
+                        {loading ? "Processing..." : "Continue"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="order-1 lg:order-2">
-            <div className="sticky top-8">
-              <div className="relative h-[450px] md:h-[600px] lg:h-[700px] w-full">
-                <CustomizableImage
-                  src={Photo2}
-                  alt="Learning journey 1"
-                  initialX={-10}
-                  initialY={-3}
-                  initialRotation={-12}
-                  width="60%"
-                  minWidth="320px"
-                  aspectRatio="4/3"
-                  zIndex={10}
-                />
-                <CustomizableImage
-                  src={Photo1}
-                  alt="Learning journey 2"
-                  initialX={35}
-                  initialY={1}
-                  initialRotation={8}
-                  width="60%"
-                  minWidth="340px"
-                  aspectRatio="4/3"
-                  zIndex={30}
-                />
-                <CustomizableImage
-                  src={Photo3}
-                  alt="Learning journey 3"
-                  initialX={15}
-                  initialY={40}
-                  initialRotation={-5}
-                  width="65%"
-                  minWidth="360px"
-                  aspectRatio="4/3"
-                  zIndex={20}
-                />
+            <div className="order-1 lg:order-2">
+              <div className="sticky top-8">
+                <div className="relative h-[450px] md:h-[600px] lg:h-[700px] w-full">
+                  <CustomizableImage
+                    src={Photo2}
+                    alt="Learning journey 1"
+                    initialX={-10}
+                    initialY={-3}
+                    initialRotation={-12}
+                    width="60%"
+                    minWidth="320px"
+                    aspectRatio="4/3"
+                    zIndex={10}
+                  />
+                  <CustomizableImage
+                    src={Photo1}
+                    alt="Learning journey 2"
+                    initialX={35}
+                    initialY={1}
+                    initialRotation={8}
+                    width="60%"
+                    minWidth="340px"
+                    aspectRatio="4/3"
+                    zIndex={30}
+                  />
+                  <CustomizableImage
+                    src={Photo3}
+                    alt="Learning journey 3"
+                    initialX={15}
+                    initialY={40}
+                    initialRotation={-5}
+                    width="65%"
+                    minWidth="360px"
+                    aspectRatio="4/3"
+                    zIndex={20}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     );
   } else if (step === 3) {
     return (
