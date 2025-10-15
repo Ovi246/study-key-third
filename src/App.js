@@ -61,10 +61,7 @@ function Form() {
     orderId: "",
     fullName: "",
     email: "",
-    set: "",
     country: { name: "United States", id: 233 },
-    rating: 0,
-    review: "",
     streetAddress: "",
     city: "",
     state: { name: "", id: null },
@@ -107,7 +104,7 @@ function Form() {
     async function fetchLocationAndSetLanguage() {
       try {
         const response = await axios.get(
-          "https://studykey-third-server.vercel.app/api/location"
+          "http://localhost:5000/api/location"
         );
         const geo = response.data;
         const language = getLanguageFromCountryCode(geo.country); // Implement this function
@@ -515,23 +512,20 @@ function Form() {
       
       // Prepare form data as JSON object
       const formDataToSubmit = {
-        ...formData,
-        reviewType,
-        selectedGift,
-        rating,
-        review: description,
-        feedback: {
-          productPurchased: feedback.productPurchased,
-          productSatisfaction: feedback.productSatisfaction,
-          wouldRecommend: feedback.wouldRecommend,
-          rating,
-          additionalComments: description
-        }
+        orderId: formData.orderId,
+        fullName: formData.fullName,
+        email: formData.email,
+        streetAddress: formData.streetAddress,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        phoneNumber: formData.phoneNumber,
+        selectedGift
       };
 
 
       const response = await axios.post(
-        "https://studykey-third-server.vercel.app/submit-review",
+        "http://localhost:5000/submit-review",
         formDataToSubmit,
         {
           headers: {
@@ -960,7 +954,6 @@ function Form() {
                     <div className="flex justify-between pt-6">
                       <button
                         onClick={() => {
-                          setReviewType(null);
                           setStep(step - 1);
                         }}
                         className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
@@ -1175,6 +1168,7 @@ function Form() {
                         <PhoneInput
                           international={false}
                           defaultCountry="US"
+                          countries={["US"]}
                           value={formData.phoneNumber}
                           onChange={(value) =>
                             handleInputChange("phoneNumber", value)
@@ -1197,7 +1191,6 @@ function Form() {
                       <button
                         type="button"
                         onClick={() => {
-                          setReviewType(null);
                           setStep(step - 1);
                         }}
                         className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
