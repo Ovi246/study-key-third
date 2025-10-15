@@ -104,7 +104,7 @@ function Form() {
     async function fetchLocationAndSetLanguage() {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/location"
+          "https://studykey-third-server.vercel.app/api/location"
         );
         const geo = response.data;
         const language = getLanguageFromCountryCode(geo.country); // Implement this function
@@ -525,7 +525,7 @@ function Form() {
 
 
       const response = await axios.post(
-        "http://localhost:5000/submit-review",
+        "https://studykey-third-server.vercel.app/submit-review",
         formDataToSubmit,
         {
           headers: {
