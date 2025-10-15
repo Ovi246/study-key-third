@@ -97,7 +97,7 @@ function Form() {
 
   const giftOptions = [
     { value: "Noun Set", label: "Noun Set" },
-    { value: "Soul Delight Set", label: "Soul Delight Set" },
+    { value: "Affirmation Set", label: "Affirmation Set" },
     {
       value: "Toddlers Learn & Play Set",
       label: "Toddlers Learn & Play Set",
