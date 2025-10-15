@@ -1,22 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import PhoneInput, {
   isPossiblePhoneNumber,
-  isValidPhoneNumber,
-  formatPhoneNumber,
 } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import validator from "validator";
 import {
-  CitySelect,
-  CountrySelect,
   StateSelect,
 } from "react-country-state-city";
 import "react-country-state-city/dist/react-country-state-city.css";
 import i18n from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
-import Intro from "./assets/toddler_box.png";
 import Photo1 from "./assets/Photo1.jpeg";
 import Photo2 from "./assets/Photo2.JPG";
 import Photo3 from "./assets/Photo3.JPG";
@@ -24,7 +19,7 @@ import Photo4 from "./assets/Photo4.jpeg";
 import Photo5 from "./assets/Photo5.jpg";
 import Photo6 from "./assets/Photo6.png";
 import CustomizableImage from "./CustomizableImg";
-import { FiUpload, FiVideo, FiCamera, FiStar, FiPlay, FiPause, FiSquare, FiRotateCcw } from 'react-icons/fi';
+import { FiStar } from 'react-icons/fi';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -86,14 +81,9 @@ function Form() {
   const [language, setLanguage] = useState("en");
   const [errors, setErrors] = useState({});
   const [reviewType, setReviewType] = useState("amazon");
-  const [screenshot, setScreenshot] = useState(null);
   const [selectedGift, setSelectedGift] = useState("");
   const [description, setDescription] = useState('');
   const [rating, setRating] = useState(0);
-  const [uploadedVideo, setUploadedVideo] = useState(null);
-  const [amazonScreenshot, setAmazonScreenshot] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef(null);
 
   const giftOptions = [
     { value: "Noun Set", label: "Noun Set" },
@@ -104,14 +94,6 @@ function Form() {
     },
   ];
 
-  const [permission, setPermission] = useState(false);
-  const [stream, setStream] = useState(null);
-  const mediaRecorder = useRef(null);
-  const liveVideoFeed = useRef(null);
-  const [recordingStatus, setRecordingStatus] = useState("inactive");
-  const [videoChunks, setVideoChunks] = useState([]);
-  const [recordedVideo, setRecordedVideo] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Add new state for feedback
   const [feedback, setFeedback] = useState({
@@ -120,22 +102,12 @@ function Form() {
     wouldRecommend: ''
   });
 
-  // Add new state for recording timer and guide
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [currentGuide, setCurrentGuide] = useState(0);
-
-  // Add recording guide questions
-  const recordingGuides = [
-    "What product did you purchase?",
-    "How do you like your set?",
-    "Would you recommend this product to others?",
-  ];
 
   useEffect(() => {
     async function fetchLocationAndSetLanguage() {
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/location"
+          "https://studykey-third-server.vercel.app/api/location"
         );
         const geo = response.data;
         const language = getLanguageFromCountryCode(geo.country); // Implement this function
@@ -169,31 +141,6 @@ function Form() {
   //   }
   // }, [asin]);
 
-  // Add this validation
-  const validateReviewStep = () => {
-    const newErrors = {};
-
-    if (!reviewType) {
-      newErrors.reviewType = "Please select a review type";
-    }
-
-    // Commented out Amazon screenshot validation
-    // if (reviewType === "amazon" && !screenshot) {
-    //   newErrors.screenshot = "Please upload your Amazon review screenshot";
-    // }
-
-    // Commented out video validation
-    // if (reviewType === "video" && !screenshot) {
-    //   newErrors.screenshot = "Please upload your video testimonial";
-    // }
-
-    if (!selectedGift) {
-      newErrors.gift = "Please select your gift";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   function getLanguageFromCountryCode(countryCode) {
     // Map country codes to languages
@@ -393,20 +340,9 @@ function Form() {
 
     // Step 2 validations (only if we're on step 2 or beyond)
     if (step >= 2) {
-      if (!reviewType) {
-        newErrors.reviewType = "Please select a review type";
-      }
       if (!selectedGift) {
         newErrors.gift = "Please select your gift";
       }
-      // Commented out Amazon screenshot validation
-      // if (reviewType === "amazon" && !screenshot) {
-      //   newErrors.screenshot = "Please upload your Amazon review screenshot";
-      // }
-      // Commented out video validation
-      // if (reviewType === "video" && (!recordedVideo)) {
-      //   newErrors.screenshot = "Please upload your video testimonial";
-      // }
     }
 
     // Step 3 validations (only if we're on step 3)
@@ -457,7 +393,7 @@ function Form() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:5000/validate-order-id",
+        "https://studykey-third-server.vercel.app/validate-order-id",
         {
           orderId: orderId,
         }
@@ -576,67 +512,30 @@ function Form() {
 
     try {
       setLoading(true);
-      const formDataToSubmit = new FormData();
-
-      // Add all form data
-      Object.keys(formData).forEach((key) => {
-        if (key === "state" || key === "country") {
-          formDataToSubmit.append(key, JSON.stringify(formData[key]));
-        } else {
-          formDataToSubmit.append(key, formData[key]);
-        }
-      });
-      // Add review type and metadata
-      formDataToSubmit.append("reviewType", reviewType);
-      formDataToSubmit.append("selectedGift", selectedGift);
-      formDataToSubmit.append("rating", rating);
-      formDataToSubmit.append("review", description);
-
-      // Add feedback data
-      formDataToSubmit.append("feedback", JSON.stringify({
-        productPurchased: feedback.productPurchased,
-        productSatisfaction: feedback.productSatisfaction,
-        wouldRecommend: feedback.wouldRecommend,
-        rating,
-        additionalComments: description
-      }));
-
-      // Handle video upload - convert Blob URL to File object if it's a recorded video
-      if (recordedVideo) {
-        try {
-          const response = await fetch(recordedVideo);
-          const videoBlob = await response.blob();
-          const videoFile = new File([videoBlob], 'recorded-video.webm', { type: 'video/webm' });
-          formDataToSubmit.append("media", videoFile);
-        } catch (error) {
-          console.error("Error processing recorded video:", error);
-          toast.error("Error processing video");
-          return;
-        }
-      }
       
-      // Handle uploaded video file
-      if (uploadedVideo) {
-        formDataToSubmit.append("media", uploadedVideo);
-      }
+      // Prepare form data as JSON object
+      const formDataToSubmit = {
+        ...formData,
+        reviewType,
+        selectedGift,
+        rating,
+        review: description,
+        feedback: {
+          productPurchased: feedback.productPurchased,
+          productSatisfaction: feedback.productSatisfaction,
+          wouldRecommend: feedback.wouldRecommend,
+          rating,
+          additionalComments: description
+        }
+      };
 
-      // Handle Amazon review screenshot
-      if (amazonScreenshot) {
-        formDataToSubmit.append("media", amazonScreenshot);
-      }
 
       const response = await axios.post(
-        "http://localhost:5000/submit-review",
+        "https://studykey-third-server.vercel.app/submit-review",
         formDataToSubmit,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const progress = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setUploadProgress(progress);
+            "Content-Type": "application/json",
           },
         }
       );
@@ -653,26 +552,9 @@ function Form() {
       );
     } finally {
       setLoading(false);
-      setUploadProgress(0);
     }
   };
 
-  // Add this component for upload progress
-const UploadProgress = ({ progress }) => {
-  if (!progress) return null;
-  
-  return (
-    <div className="w-full mt-4">
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
-      <p className="text-sm text-gray-600 mt-1">Uploading: {progress}%</p>
-    </div>
-  );
-};
 
   // Add this component for star rating
   const StarRating = ({ rating, onRatingChange }) => (
@@ -694,128 +576,7 @@ const UploadProgress = ({ progress }) => {
     </div>
   );
 
-  const handleVideoUpload = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('video/')) {
-      setUploadedVideo(file);
-      setRecordedVideo(null);
-      setScreenshot(file);
-    } else {
-      toast.error('Please upload a valid video file');
-    }
-  };
-  
-  const handleScreenshotUpload = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      setAmazonScreenshot(file);
-      setScreenshot(file);
-    } else {
-      toast.error('Please upload a valid image file');
-    }
-  };
 
-  const mimeType = 'video/webm; codecs="opus,vp8"';
-
-  const startRecording = async () => {
-    setRecordingStatus("recording");
-    setRecordingTime(0);
-    setCurrentGuide(0);
-    
-    const media = new MediaRecorder(stream, { mimeType });
-    mediaRecorder.current = media;
-    mediaRecorder.current.start();
-  
-    let localVideoChunks = [];
-    mediaRecorder.current.ondataavailable = (event) => {
-      if (typeof event.data === "undefined") return;
-      if (event.data.size === 0) return;
-      localVideoChunks.push(event.data);
-    };
-  
-    setVideoChunks(localVideoChunks);
-  
-    // Start timer and guide rotation
-    const timer = setInterval(() => {
-      setRecordingTime(prev => {
-        const newTime = prev + 1;
-        // Change guide question every 20 seconds
-        if (newTime % 20 === 0) {
-          setCurrentGuide(prev => (prev + 1) % recordingGuides.length);
-        }
-        // Stop recording after 60 seconds
-        if (newTime >= 60) {
-          clearInterval(timer);
-          stopRecording();
-        }
-        return newTime;
-      });
-    }, 1000);
-  };
-  
-  const stopRecording = () => {
-    setPermission(false);
-    setRecordingStatus("inactive");
-    mediaRecorder.current.stop();
-  
-    // Stop all tracks in the stream and clear the live video feed
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      if (liveVideoFeed.current) {
-        liveVideoFeed.current.srcObject = null;
-      }
-    }
-  
-    mediaRecorder.current.onstop = () => {
-      const videoBlob = new Blob(videoChunks, { type: mimeType });
-      const videoUrl = URL.createObjectURL(videoBlob);
-      setRecordedVideo(videoUrl);
-      setVideoChunks([]);
-      setIsPlaying(false);
-      setStream(null); // Clear the stream state
-    };
-  };
-  
-  useEffect(() => {
-    if (!stream) return;
-    return () => {
-      stream.getTracks().forEach(track => track.stop());
-    };
-  }, [stream]);
-
-  const getCameraPermission = async () => {
-    setRecordedVideo(null);
-    setIsPlaying(false);
-    
-    if ("MediaRecorder" in window) {
-      try {
-        const videoConstraints = {
-          audio: false,
-          video: true,
-        };
-        const audioConstraints = { audio: true };
-  
-        const audioStream = await navigator.mediaDevices.getUserMedia(audioConstraints);
-        const videoStream = await navigator.mediaDevices.getUserMedia(videoConstraints);
-  
-        setPermission(true);
-  
-        const combinedStream = new MediaStream([
-          ...videoStream.getVideoTracks(),
-          ...audioStream.getAudioTracks(),
-        ]);
-  
-        setStream(combinedStream);
-        if (liveVideoFeed.current) {
-          liveVideoFeed.current.srcObject = combinedStream;
-        }
-      } catch (err) {
-        toast.error(err.message);
-      }
-    } else {
-      toast.error("The MediaRecorder API is not supported in your browser.");
-    }
-  };
 
   if (step === 0) {
     return (
@@ -1200,7 +961,6 @@ const UploadProgress = ({ progress }) => {
                       <button
                         onClick={() => {
                           setReviewType(null);
-                          setScreenshot(null);
                           setStep(step - 1);
                         }}
                         className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
@@ -1438,7 +1198,6 @@ const UploadProgress = ({ progress }) => {
                         type="button"
                         onClick={() => {
                           setReviewType(null);
-                          setScreenshot(null);
                           setStep(step - 1);
                         }}
                         className="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all"
@@ -1451,7 +1210,6 @@ const UploadProgress = ({ progress }) => {
                       >
                         {loading ? "Processing..." : "Submit"}
                       </button>
-                      {loading && <UploadProgress progress={uploadProgress} />}
                     </div>
                   </form>
                 </div>
