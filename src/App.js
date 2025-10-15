@@ -135,7 +135,7 @@ function Form() {
     async function fetchLocationAndSetLanguage() {
       try {
         const response = await axios.get(
-          "https://studykey-third-server.vercel.app/api/location"
+          "http://localhost:5000/api/location"
         );
         const geo = response.data;
         const language = getLanguageFromCountryCode(geo.country); // Implement this function
@@ -378,23 +378,21 @@ function Form() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Step 1 validations
-    if (step === 1) {
-      if (!formData.fullName.trim()) {
-        newErrors.fullName = "Full name is required";
-      }
-      if (!formData.email.trim()) {
-        newErrors.email = "Email is required";
-      } else if (!validator.isEmail(formData.email)) {
-        newErrors.email = "Please enter a valid email";
-      }
-      if (!formData.orderId.trim()) {
-        newErrors.orderId = "Order ID is required";
-      }
+    // Always validate basic required fields (from step 1) since they're needed for submission
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!validator.isEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+    if (!formData.orderId.trim()) {
+      newErrors.orderId = "Order ID is required";
     }
 
-    // Step 2 validations
-    if (step === 2) {
+    // Step 2 validations (only if we're on step 2 or beyond)
+    if (step >= 2) {
       if (!reviewType) {
         newErrors.reviewType = "Please select a review type";
       }
@@ -411,7 +409,7 @@ function Form() {
       // }
     }
 
-    // Step 3 validations
+    // Step 3 validations (only if we're on step 3)
     if (step === 3) {
       if (!formData.streetAddress.trim()) {
         newErrors.streetAddress = "Street address is required";
@@ -459,7 +457,7 @@ function Form() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "https://studykey-third-server.vercel.app/validate-order-id",
+        "http://localhost:5000/validate-order-id",
         {
           orderId: orderId,
         }
@@ -482,7 +480,7 @@ function Form() {
   const handleNextStep = async (e) => {
     e.preventDefault();
 
-    // Special handling for step 0
+    // Special handling for step 1 (first form with email, name, order ID)
     if (step === 1) {
       const newErrors = {};
 
@@ -628,7 +626,7 @@ function Form() {
       }
 
       const response = await axios.post(
-        "https://studykey-third-server.vercel.app/submit-review",
+        "http://localhost:5000/submit-review",
         formDataToSubmit,
         {
           headers: {
