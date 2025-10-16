@@ -397,6 +397,7 @@ function Form() {
       );
 
       if (response.data.valid) {
+        setAsin(response.data.asins[0])
         return null;
       } else {
         return "Invalid Order ID. Please check and try again.";
